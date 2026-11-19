@@ -2,3 +2,5 @@ build/bin/
 /dist/
 .DS_Store
 frontend/dist/changelog.json
+/diplomacia
+/recado

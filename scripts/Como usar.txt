@@ -1,4 +1,4 @@
-RECADO: O SEU WHATSAPP NO CLAUDE
+DIPLOMACIA: O SEU WHATSAPP NO CLAUDE
 
 O DiplomacIA grava as suas conversas do WhatsApp neste Mac e transcreve os áudios.
 O Claude lê e envia mensagens pelo DiplomacIA.
@@ -21,7 +21,7 @@ O DiplomacIA só funciona em Mac com chip Apple (M1 ou mais novo).
 - Mantenha o DiplomacIA aberto. O ícone de balão fica na barra de menus, no alto da tela.
 - Para encerrar o DiplomacIA, clique no ícone e escolha "Sair".
 
-3. LIGUE O RECADO AO CLAUDE
+3. LIGUE O DIPLOMACIA AO CLAUDE
 - No Claude Code: o instalador liga o DiplomacIA sozinho. Abra uma sessão nova do Claude Code.
 - No app Claude para Mac: abra Ajustes > Desenvolvedor > Editar configuração.
   Coloque este trecho no arquivo, salve e reinicie o Claude:
@@ -43,6 +43,18 @@ O DiplomacIA só funciona em Mac com chip Apple (M1 ou mais novo).
 - "Procure no WhatsApp a mensagem sobre o contrato."
 - "Busque mensagens mais antigas da conversa com o João."
 - "Mande para o João: chego às 15h."
+
+5. ESCOLHA O TOM
+- Na janela do DiplomacIA, escreva o tom padrão ou escolha um modelo pronto. Clique em "Salvar".
+- Em "Tom por conversa", escolha uma pessoa ou um grupo para dar um tom próprio.
+- O Claude lê o tom da conversa antes de redigir uma resposta.
+
+6. USE OS ATALHOS
+- No Claude Code, digite / e escolha um atalho do DiplomacIA:
+  /mcp__diplomacia__responder: redige a resposta no tom da conversa e envia depois da sua confirmação.
+  /mcp__diplomacia__resumir: resume fatos, decisões, pedidos e prazos de uma conversa.
+  /mcp__diplomacia__pendentes: lista as conversas que esperam uma resposta sua.
+  /mcp__diplomacia__tom: mostra ou grava o tom de uma conversa ou o tom padrão.
 
 O Claude envia as mensagens no seu nome. Confira o texto antes de aprovar o envio.
 Para enviar mensagens ou buscar mensagens antigas, o DiplomacIA precisa estar aberto e o celular, online.
