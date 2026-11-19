@@ -12,8 +12,11 @@ PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 echo "1/4 Instalando o DiplomacIA em /Applications..."
 app=/Applications/DiplomacIA.app
 # Trocar o app com ele aberto deixa a janela em branco: o WebKit recusa o binário antigo, que não bate com a assinatura nova.
-for id in com.wails.diplomacia com.wails.recado; do
-  osascript -e "if application id \"$id\" is running then tell application id \"$id\" to quit" >/dev/null 2>&1 || true
+for name in DiplomacIA Recado; do
+  gui="/Applications/$name.app/Contents/MacOS/$name\$"
+  pgrep -qf "$gui" || continue
+  osascript -e "quit app id \"com.wails.$(echo "$name" | tr '[:upper:]' '[:lower:]')\"" >/dev/null 2>&1 || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -qf "$gui" || break; sleep 1; done
 done
 rm -rf "$app" /Applications/Recado.app
 data="$HOME/Library/Application Support/DiplomacIA"
