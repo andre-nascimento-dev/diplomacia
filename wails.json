@@ -1,0 +1,9 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "DiplomacIA",
+  "outputfilename": "DiplomacIA",
+  "frontend:install": "",
+  "frontend:build": "",
+  "author": { "name": "André Nascimento" },
+  "info": { "productName": "DiplomacIA", "productVersion": "0.1.0" }
+}
