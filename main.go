@@ -32,12 +32,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	dir := filepath.Join(home, "Library", "Application Support", "Recado")
+	dir := filepath.Join(home, "Library", "Application Support", "DiplomacIA")
 	mediaDir := filepath.Join(dir, "media")
 	if err := os.MkdirAll(mediaDir, 0o700); err != nil {
 		return err
 	}
-	db, err := openDB(filepath.Join(dir, "recado.db"))
+	db, err := openDB(filepath.Join(dir, "diplomacia.db"))
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func run() error {
 	model := filepath.Join(dir, "models", modelFile)
 	app := &App{db: db}
 	return wails.Run(&options.App{
-		Title:             "Recado",
+		Title:             "DiplomacIA",
 		Width:             520,
 		Height:            760,
 		MinWidth:          360,

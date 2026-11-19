@@ -101,7 +101,7 @@ func (w *WA) watchQR(qrs <-chan whatsmeow.QRChannelItem) {
 		case "success":
 			w.setState("Conectado.", "")
 		case "timeout":
-			w.setState("O QR code expirou. Feche e abra o Recado de novo.", "")
+			w.setState("O QR code expirou. Feche e abra o DiplomacIA de novo.", "")
 		default:
 			if item.Error != nil {
 				w.setState("Falha no vínculo: "+item.Error.Error(), "")
@@ -127,9 +127,9 @@ func (w *WA) handle(evt any) {
 	case *events.Connected:
 		w.setState("Conectado.", "")
 	case *events.Disconnected:
-		w.setState("Sem conexão. O Recado tenta conectar de novo.", "")
+		w.setState("Sem conexão. O DiplomacIA tenta conectar de novo.", "")
 	case *events.LoggedOut:
-		w.setState("O celular desconectou o Recado. Feche e abra o app para ver um QR code novo.", "")
+		w.setState("O celular desconectou o DiplomacIA. Feche e abra o app para ver um QR code novo.", "")
 		_ = w.cli.Store.Delete(context.Background())
 	case *events.Message:
 		go func() {
@@ -356,7 +356,7 @@ func (w *WA) chatName(ctx context.Context, chat types.JID, m Message) string {
 
 func (w *WA) Send(ctx context.Context, o Outgoing) error {
 	if !w.cli.IsLoggedIn() {
-		return fmt.Errorf("o Recado não está conectado ao WhatsApp")
+		return fmt.Errorf("o DiplomacIA não está conectado ao WhatsApp")
 	}
 	to, err := types.ParseJID(o.Chat)
 	if err != nil {
@@ -421,7 +421,7 @@ func (w *WA) fileMessage(ctx context.Context, path, caption string) (*waE2E.Mess
 }
 
 func (w *WA) voiceNote(ctx context.Context, path string) (*waE2E.Message, int, error) {
-	ogg, err := os.CreateTemp("", "recado-*.ogg")
+	ogg, err := os.CreateTemp("", "diplomacia-*.ogg")
 	if err != nil {
 		return nil, 0, err
 	}

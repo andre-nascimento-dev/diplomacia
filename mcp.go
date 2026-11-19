@@ -61,7 +61,7 @@ type sendFileIn struct {
 
 type sendAudioIn struct {
 	Chat string `json:"chat" jsonschema:"JID da conversa ou número com DDI e DDD"`
-	Path string `json:"path" jsonschema:"caminho absoluto de um arquivo de áudio local; o Recado converte para mensagem de voz"`
+	Path string `json:"path" jsonschema:"caminho absoluto de um arquivo de áudio local; o DiplomacIA converte para mensagem de voz"`
 }
 
 type toneIn struct {
@@ -74,9 +74,9 @@ type setToneIn struct {
 }
 
 func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
-	s := mcp.NewServer(&mcp.Implementation{Name: "recado", Version: "0.1.0"}, nil)
+	s := mcp.NewServer(&mcp.Implementation{Name: "diplomacia", Version: "0.1.0"}, nil)
 
-	mcp.AddTool(s, &mcp.Tool{Name: "list_chats", Description: "Lista as conversas do WhatsApp gravadas pelo Recado, das mais recentes para as mais antigas. Pagine com before."},
+	mcp.AddTool(s, &mcp.Tool{Name: "list_chats", Description: "Lista as conversas do WhatsApp gravadas pelo DiplomacIA, das mais recentes para as mais antigas. Pagine com before."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in listChatsIn) (*mcp.CallToolResult, any, error) {
 			return jsonResult(listChats(db, in.Query, limitOr(in.Limit), in.Before))
 		})
@@ -90,7 +90,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return jsonResult(recentMessages(db, chat, limitOr(in.Limit), in.Before))
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "get_media", Description: "Baixa e devolve o arquivo de uma mensagem: a foto como imagem, o vídeo como quadros e transcrição, o texto (md, txt, csv, json) como conteúdo, e o caminho local de todo arquivo, por exemplo um PDF. O app Recado precisa estar aberto para baixar um arquivo que ainda não está no Mac."},
+	mcp.AddTool(s, &mcp.Tool{Name: "get_media", Description: "Baixa e devolve o arquivo de uma mensagem: a foto como imagem, o vídeo como quadros e transcrição, o texto (md, txt, csv, json) como conteúdo, e o caminho local de todo arquivo, por exemplo um PDF. O app DiplomacIA precisa estar aberto para baixar um arquivo que ainda não está no Mac."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in mediaIn) (*mcp.CallToolResult, any, error) {
 			chat, err := normalizeChat(in.Chat)
 			if err != nil {
@@ -99,7 +99,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return getMedia(ctx, db, chat, in.ID)
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "load_older_messages", Description: "Pede ao celular as mensagens anteriores à mais antiga que o Recado tem de uma conversa, e grava e transcreve os áudios que chegam. O celular precisa estar online e o app Recado aberto."},
+	mcp.AddTool(s, &mcp.Tool{Name: "load_older_messages", Description: "Pede ao celular as mensagens anteriores à mais antiga que o DiplomacIA tem de uma conversa, e grava e transcreve os áudios que chegam. O celular precisa estar online e o app DiplomacIA aberto."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in olderIn) (*mcp.CallToolResult, any, error) {
 			chat, err := normalizeChat(in.Chat)
 			if err != nil {
@@ -152,7 +152,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return textResult("Tom da conversa gravado.")
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "send_message", Description: "Envia uma mensagem de texto pelo WhatsApp. Antes de redigir, leia o tom da conversa com get_tone. O app Recado precisa estar aberto."},
+	mcp.AddTool(s, &mcp.Tool{Name: "send_message", Description: "Envia uma mensagem de texto pelo WhatsApp. Antes de redigir, leia o tom da conversa com get_tone. O app DiplomacIA precisa estar aberto."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in sendIn) (*mcp.CallToolResult, any, error) {
 			if strings.TrimSpace(in.Text) == "" {
 				return nil, nil, fmt.Errorf("a mensagem está vazia")
@@ -160,7 +160,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return queueAndWait(ctx, db, Outgoing{Chat: in.Chat, Text: in.Text})
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "send_audio", Description: "Envia um arquivo de áudio como mensagem de voz pelo WhatsApp. O app Recado precisa estar aberto."},
+	mcp.AddTool(s, &mcp.Tool{Name: "send_audio", Description: "Envia um arquivo de áudio como mensagem de voz pelo WhatsApp. O app DiplomacIA precisa estar aberto."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in sendAudioIn) (*mcp.CallToolResult, any, error) {
 			if !filepath.IsAbs(in.Path) || !fileExists(in.Path) {
 				return nil, nil, fmt.Errorf("o arquivo %q não existe; use um caminho absoluto", in.Path)
@@ -168,7 +168,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return queueAndWait(ctx, db, Outgoing{Chat: in.Chat, Audio: in.Path})
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "send_file", Description: "Envia um arquivo pelo WhatsApp: foto, vídeo, PDF ou qualquer documento. O app Recado precisa estar aberto."},
+	mcp.AddTool(s, &mcp.Tool{Name: "send_file", Description: "Envia um arquivo pelo WhatsApp: foto, vídeo, PDF ou qualquer documento. O app DiplomacIA precisa estar aberto."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in sendFileIn) (*mcp.CallToolResult, any, error) {
 			if !filepath.IsAbs(in.Path) || !fileExists(in.Path) {
 				return nil, nil, fmt.Errorf("o arquivo %q não existe; use um caminho absoluto", in.Path)
@@ -207,7 +207,7 @@ func queueAndWait(ctx context.Context, db *sql.DB, o Outgoing) (*mcp.CallToolRes
 		case <-time.After(time.Second):
 		}
 	}
-	return textResult(fmt.Sprintf("O envio %d aguarda o app Recado. Abra o app: o envio sai quando ele conectar.", id))
+	return textResult(fmt.Sprintf("O envio %d aguarda o app DiplomacIA. Abra o app: o envio sai quando ele conectar.", id))
 }
 
 func getMedia(ctx context.Context, db *sql.DB, chat, id string) (*mcp.CallToolResult, any, error) {
@@ -220,7 +220,7 @@ func getMedia(ctx context.Context, db *sql.DB, chat, id string) (*mcp.CallToolRe
 	}
 	if _, statErr := os.Stat(m.File); m.File == "" || statErr != nil {
 		if len(m.Media) == 0 {
-			return nil, nil, fmt.Errorf("a mensagem %s chegou antes de o Recado guardar arquivos; peça para reenviar o arquivo", id)
+			return nil, nil, fmt.Errorf("a mensagem %s chegou antes de o DiplomacIA guardar arquivos; peça para reenviar o arquivo", id)
 		}
 		if err := requestDownload(db, chat, id); err != nil {
 			return nil, nil, err
@@ -228,7 +228,7 @@ func getMedia(ctx context.Context, db *sql.DB, chat, id string) (*mcp.CallToolRe
 		m.Status = "download"
 		for deadline := time.Now().Add(3 * time.Minute); m.Status == "download"; {
 			if time.Now().After(deadline) {
-				return textResult("O download aguarda o app Recado. Abra o app e chame get_media de novo.")
+				return textResult("O download aguarda o app DiplomacIA. Abra o app e chame get_media de novo.")
 			}
 			select {
 			case <-ctx.Done():
@@ -273,7 +273,7 @@ func mediaResult(ctx context.Context, m Message) (*mcp.CallToolResult, any, erro
 }
 
 func videoFrames(ctx context.Context, path string, seconds int) ([]mcp.Content, error) {
-	dir, err := os.MkdirTemp("", "recado-frames-*")
+	dir, err := os.MkdirTemp("", "diplomacia-frames-*")
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func loadOlder(ctx context.Context, db *sql.DB, chat string, count int) (*mcp.Ca
 		}
 	}
 	if status, _, _ := historyRequestStatus(db, id); status == "waiting" {
-		return textResult("O pedido aguarda o app Recado. Abra o app e tente de novo.")
+		return textResult("O pedido aguarda o app DiplomacIA. Abra o app e tente de novo.")
 	}
 	if got == 0 {
 		return textResult(fmt.Sprintf("O celular não mandou mensagens anteriores a %s em 90 segundos. A conversa pode não ter mensagens mais antigas, ou o celular está offline.",
@@ -352,7 +352,7 @@ func findContacts(ctx context.Context, storePath, query string) ([]Contact, erro
 		FROM whatsmeow_contacts WHERE full_name LIKE ? OR first_name LIKE ? OR push_name LIKE ? OR their_jid LIKE ?
 		ORDER BY full_name LIMIT 30`, like, like, like, like)
 	if err != nil {
-		return nil, fmt.Errorf("a agenda ainda não existe: abra o Recado e vincule o celular (%w)", err)
+		return nil, fmt.Errorf("a agenda ainda não existe: abra o DiplomacIA e vincule o celular (%w)", err)
 	}
 	defer rows.Close()
 	out := []Contact{}

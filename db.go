@@ -155,7 +155,7 @@ func oldestMessage(db *sql.DB, chat string) (Message, error) {
 		return Message{}, err
 	}
 	if len(found) == 0 {
-		return Message{}, fmt.Errorf("o Recado não tem mensagem da conversa %s; o celular só manda o histórico anterior a uma mensagem conhecida", chat)
+		return Message{}, fmt.Errorf("o DiplomacIA não tem mensagem da conversa %s; o celular só manda o histórico anterior a uma mensagem conhecida", chat)
 	}
 	return found[0], nil
 }

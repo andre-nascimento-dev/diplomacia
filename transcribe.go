@@ -44,7 +44,7 @@ func transcribeLoop(ctx context.Context, db *sql.DB, model string) {
 func transcribe(ctx context.Context, model, file string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
-	wav, err := os.CreateTemp("", "recado-*.wav")
+	wav, err := os.CreateTemp("", "diplomacia-*.wav")
 	if err != nil {
 		return "", err
 	}

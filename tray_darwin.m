@@ -20,11 +20,11 @@ void startTray(void) {
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         Tray *tray = [Tray new];
         NSStatusItem *item = [[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
-        NSImage *icon = [NSImage imageWithSystemSymbolName:@"bubble.left.fill" accessibilityDescription:@"Recado"];
+        NSImage *icon = [NSImage imageWithSystemSymbolName:@"bubble.left.and.bubble.right.fill" accessibilityDescription:@"DiplomacIA"];
         icon.template = YES;
         item.button.image = icon;
         NSMenu *menu = [NSMenu new];
-        [menu addItemWithTitle:@"Abrir Recado" action:@selector(open:) keyEquivalent:@""].target = tray;
+        [menu addItemWithTitle:@"Abrir DiplomacIA" action:@selector(open:) keyEquivalent:@""].target = tray;
         [menu addItem:[NSMenuItem separatorItem]];
         [menu addItemWithTitle:@"Sair" action:@selector(quit:) keyEquivalent:@"q"].target = tray;
         item.menu = menu;

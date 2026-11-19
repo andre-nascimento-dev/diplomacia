@@ -1,4 +1,4 @@
-module recado
+module diplomacia
 
 go 1.27.4
 

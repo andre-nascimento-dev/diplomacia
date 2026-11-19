@@ -1,8 +1,8 @@
 RECADO: O SEU WHATSAPP NO CLAUDE
 
-O Recado grava as suas conversas do WhatsApp neste Mac e transcreve os áudios.
-O Claude lê e envia mensagens pelo Recado.
-O Recado só funciona em Mac com chip Apple (M1 ou mais novo).
+O DiplomacIA grava as suas conversas do WhatsApp neste Mac e transcreve os áudios.
+O Claude lê e envia mensagens pelo DiplomacIA.
+O DiplomacIA só funciona em Mac com chip Apple (M1 ou mais novo).
 
 1. INSTALE
 - Não dê dois cliques no "Instalar.command". O Mac diz que o arquivo está "danificado", porque ele não tem assinatura da Apple.
@@ -11,31 +11,31 @@ O Recado só funciona em Mac com chip Apple (M1 ou mais novo).
 - Arraste o arquivo "Instalar.command" para a janela do Terminal e tecle Return.
 - Espere o fim. Na primeira vez, o instalador baixa um modelo de 550 MB.
 - Se o Terminal mostrar "Operation not permitted", abra Ajustes > Privacidade e Segurança > Arquivos e Pastas. Dê acesso ao Terminal e execute o instalador de novo.
-- Não arraste o Recado para Aplicativos. Sem o instalador, o Mac diz que o Recado está "danificado".
-- Se o Mac disser que o Recado está "danificado", execute o instalador de novo pelo Terminal.
+- Não arraste o DiplomacIA para Aplicativos. Sem o instalador, o Mac diz que o DiplomacIA está "danificado".
+- Se o Mac disser que o DiplomacIA está "danificado", execute o instalador de novo pelo Terminal.
 
 2. CONECTE O WHATSAPP
-- No fim, o instalador abre o Recado. Nas próximas vezes, abra o Recado em Aplicativos.
+- No fim, o instalador abre o DiplomacIA. Nas próximas vezes, abra o DiplomacIA em Aplicativos.
 - No celular, abra o WhatsApp > Dispositivos conectados > Conectar dispositivo.
-- Leia o QR code da janela do Recado.
-- Mantenha o Recado aberto. O ícone de balão fica na barra de menus, no alto da tela.
-- Para encerrar o Recado, clique no ícone e escolha "Sair".
+- Leia o QR code da janela do DiplomacIA.
+- Mantenha o DiplomacIA aberto. O ícone de balão fica na barra de menus, no alto da tela.
+- Para encerrar o DiplomacIA, clique no ícone e escolha "Sair".
 
 3. LIGUE O RECADO AO CLAUDE
-- No Claude Code: o instalador liga o Recado sozinho. Abra uma sessão nova do Claude Code.
+- No Claude Code: o instalador liga o DiplomacIA sozinho. Abra uma sessão nova do Claude Code.
 - No app Claude para Mac: abra Ajustes > Desenvolvedor > Editar configuração.
   Coloque este trecho no arquivo, salve e reinicie o Claude:
 
   {
     "mcpServers": {
-      "recado": {
-        "command": "/Applications/Recado.app/Contents/MacOS/Recado",
+      "diplomacia": {
+        "command": "/Applications/DiplomacIA.app/Contents/MacOS/DiplomacIA",
         "args": ["mcp"]
       }
     }
   }
 
-  Se o arquivo já tem um "mcpServers", coloque somente o bloco "recado" dentro dele.
+  Se o arquivo já tem um "mcpServers", coloque somente o bloco "diplomacia" dentro dele.
 
 4. PEÇA AO CLAUDE
 - "Quais são as minhas conversas mais recentes no WhatsApp?"
@@ -45,4 +45,4 @@ O Recado só funciona em Mac com chip Apple (M1 ou mais novo).
 - "Mande para o João: chego às 15h."
 
 O Claude envia as mensagens no seu nome. Confira o texto antes de aprovar o envio.
-Para enviar mensagens ou buscar mensagens antigas, o Recado precisa estar aberto e o celular, online.
+Para enviar mensagens ou buscar mensagens antigas, o DiplomacIA precisa estar aberto e o celular, online.
