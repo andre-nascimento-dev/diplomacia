@@ -3,39 +3,215 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recado</title>
+<title>DiplomacIA</title>
 <style>
-  :root { --bg: #f6f7f8; --fg: #17212b; --muted: #5d6874; --ok: #1f8a70; --off: #b3261e; color-scheme: light dark; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0f1419; --fg: #e8edf2; --muted: #9aa6b2; --ok: #3fb68f; --off: #f2827a; } }
-  body { margin: 0; min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 16px; padding: 16px;
-    background: var(--bg); color: var(--fg); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-align: center; }
-  h1 { margin: 0; font-size: 28px; }
-  h1.ok { color: var(--ok); }
-  h1.off { color: var(--off); }
-  p { margin: 0; max-width: 420px; color: var(--muted); }
-  img { width: 280px; height: 280px; background: #fff; padding: 12px; border-radius: 10px; }
+  :root { --bg: #f6f7f8; --card: #fff; --fg: #17212b; --muted: #5d6874; --line: #dfe3e8; --accent: #3b5bdb; --accent-fg: #fff;
+    --ok: #1f8a70; --off: #b3261e; --chip: #eef1f5; color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1419; --card: #171e26; --fg: #e8edf2; --muted: #9aa6b2; --line: #2a333d;
+    --accent: #7b93f2; --accent-fg: #0f1419; --ok: #3fb68f; --off: #f2827a; --chip: #222b35; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  header img { width: 32px; height: 32px; }
+  header h1 { margin: 0; font-size: 18px; flex: 1; }
+  .pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--chip); }
+  .pill.ok { color: var(--ok); } .pill.off { color: var(--off); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  h2 { margin: 0 0 2px; font-size: 15px; }
+  .hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+  #connect { text-align: center; }
+  #qr { width: 240px; height: 240px; background: #fff; padding: 10px; border-radius: 10px; margin-top: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: inherit; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 6px 12px; cursor: pointer; min-height: 32px; }
+  button.chip { background: var(--chip); border-color: transparent; border-radius: 999px; padding: 4px 10px; font-size: 13px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 600; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  textarea, input { width: 100%; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  textarea { min-height: 76px; resize: vertical; }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .row .grow { flex: 1; color: var(--muted); font-size: 13px; }
+  ul { list-style: none; margin: 8px 0 0; padding: 0; max-height: 320px; overflow-y: auto; }
+  li button { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 8px 4px; background: transparent; display: grid; gap: 2px; }
+  li button:hover { background: var(--chip); }
+  li .tone { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  li .tone.own { color: var(--accent); }
+  .empty { color: var(--muted); padding: 8px 4px; }
+  dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--fg); padding: 16px; width: min(460px, calc(100vw - 32px)); }
+  dialog::backdrop { background: rgb(0 0 0 / .4); }
+  dialog h2 { margin-bottom: 10px; }
+  #versions { max-height: 60vh; overflow-y: auto; }
+  .version { border-top: 1px solid var(--line); padding: 10px 0; }
+  .version h3 { margin: 0 0 6px; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .version time { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .version ul { margin: 0; max-height: none; }
+  .version li { display: flex; gap: 8px; align-items: baseline; padding: 2px 0; }
+  .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 6px; background: var(--chip); white-space: nowrap; }
+  .tag.feat { color: var(--ok); } .tag.fix { color: var(--off); } .tag.perf { color: var(--accent); }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
-<h1 id="state" role="status" aria-live="polite">Não conectado</h1>
-<p id="detail"></p>
-<img id="qr" alt="QR code para vincular o celular" hidden>
+<header>
+  <img src="appicon.png" alt="">
+  <h1>DiplomacIA</h1>
+  <span id="state" class="pill off" role="status" aria-live="polite">Não conectado</span>
+  <button id="openChangelog" type="button">Change logs</button>
+</header>
+
+<section id="connect" hidden>
+  <p id="detail" class="hint"></p>
+  <img id="qr" alt="QR code para vincular o celular" hidden>
+</section>
+
+<section aria-labelledby="defaultTitle">
+  <h2 id="defaultTitle">Tom padrão</h2>
+  <p class="hint">O Claude usa este tom em toda conversa sem tom próprio.</p>
+  <div class="chips" data-target="defaultTone"></div>
+  <textarea id="defaultTone" aria-labelledby="defaultTitle" placeholder="Ex.: profissional e cordial, frases curtas, sem emojis."></textarea>
+  <div class="row"><span id="defaultSaved" class="grow" role="status"></span><button id="saveDefault" class="primary" type="button">Salvar</button></div>
+</section>
+
+<section aria-labelledby="chatsTitle">
+  <h2 id="chatsTitle">Tom por conversa</h2>
+  <p class="hint">Escolha uma pessoa ou um grupo para dar um tom próprio.</p>
+  <input id="search" type="search" placeholder="Buscar conversa" aria-label="Buscar conversa">
+  <ul id="chats"></ul>
+</section>
+
+<dialog id="toneDialog" aria-labelledby="toneTitle">
+  <h2 id="toneTitle"></h2>
+  <div class="chips" data-target="chatTone"></div>
+  <textarea id="chatTone" aria-labelledby="toneTitle" placeholder="Vazio: a conversa usa o tom padrão."></textarea>
+  <p id="toneError" class="hint" role="alert"></p>
+  <div class="row"><span class="grow"></span>
+    <button id="useDefault" type="button">Usar o padrão</button>
+    <button id="cancelTone" type="button">Cancelar</button>
+    <button id="saveTone" class="primary" type="button">Salvar</button>
+  </div>
+</dialog>
+
+<dialog id="changelog" aria-labelledby="changelogTitle">
+  <h2 id="changelogTitle">Change logs</h2>
+  <p id="current" class="hint"></p>
+  <div id="versions"></div>
+  <div class="row"><span class="grow"></span><button id="closeChangelog" type="button">Fechar</button></div>
+</dialog>
+
 <script>
-  async function refresh() {
+  const app = () => window.go.main.App;
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, ...children) => {
+    const node = Object.assign(document.createElement(tag), props);
+    node.append(...children);
+    return node;
+  };
+  const presets = {
+    "Formal": "Formal e respeitoso. Trate por senhor ou senhora. Sem gírias e sem emojis.",
+    "Profissional e próximo": "Profissional e cordial. Trate pelo nome. Frases claras, no máximo um emoji.",
+    "Informal": "Informal e leve, como entre amigos. Pode usar gírias leves e emojis.",
+    "Direto e curto": "Direto e curto. Uma ou duas frases, sem rodeios e sem saudação longa.",
+    "Carinhoso": "Carinhoso e acolhedor. Demonstre afeto e use emojis de carinho.",
+  };
+
+  document.querySelectorAll(".chips").forEach((box) => {
+    for (const [label, text] of Object.entries(presets)) {
+      box.append(el("button", { type: "button", className: "chip", textContent: label, onclick: () => { $(box.dataset.target).value = text; } }));
+    }
+  });
+
+  async function refreshStatus() {
     try {
-      const s = await window.go.main.App.Status();
-      document.getElementById("state").textContent = s.connected ? "Conectado" : "Não conectado";
-      document.getElementById("state").className = s.connected ? "ok" : "off";
-      document.getElementById("detail").textContent = s.connected ? "" : s.detail;
-      document.getElementById("qr").hidden = !s.qr;
-      if (s.qr) document.getElementById("qr").src = s.qr;
+      const s = await app().Status();
+      $("state").textContent = s.connected ? "Conectado" : "Não conectado";
+      $("state").className = "pill " + (s.connected ? "ok" : "off");
+      $("connect").hidden = s.connected;
+      $("detail").textContent = s.detail;
+      $("qr").hidden = !s.qr;
+      if (s.qr) $("qr").src = s.qr;
     } catch (err) {
-      document.getElementById("detail").textContent = String(err);
+      $("connect").hidden = false;
+      $("detail").textContent = String(err);
     }
   }
-  refresh();
-  setInterval(refresh, 2000);
+
+  $("saveDefault").onclick = async () => {
+    try {
+      await app().SetDefaultTone($("defaultTone").value);
+      $("defaultSaved").textContent = "Tom padrão salvo.";
+    } catch (err) {
+      $("defaultSaved").textContent = "O tom não foi salvo: " + err;
+    }
+  };
+
+  const chatName = (c) => c.name || c.jid.split("@")[0];
+  let editing = null;
+
+  async function loadChats() {
+    const list = $("chats");
+    try {
+      const chats = await app().Chats($("search").value.trim());
+      list.replaceChildren(...chats.map((c) => el("li", {}, el("button", { type: "button", onclick: () => openTone(c) },
+        el("span", { textContent: chatName(c) }),
+        el("span", { className: "tone" + (c.tone ? " own" : ""), textContent: c.tone || "Usa o tom padrão" })))));
+      if (!chats.length) list.replaceChildren(el("li", { className: "empty", textContent: "Nenhuma conversa encontrada." }));
+    } catch (err) {
+      list.replaceChildren(el("li", { className: "empty", textContent: "As conversas não carregaram: " + err }));
+    }
+  }
+
+  function openTone(c) {
+    editing = c;
+    $("toneTitle").textContent = "Tom com " + chatName(c);
+    $("chatTone").value = c.tone;
+    $("toneError").textContent = "";
+    $("toneDialog").showModal();
+  }
+
+  async function saveTone(tone) {
+    try {
+      await app().SetChatTone(editing.jid, tone);
+      $("toneDialog").close();
+      loadChats();
+    } catch (err) {
+      $("toneError").textContent = "O tom não foi salvo: " + err;
+    }
+  }
+
+  $("saveTone").onclick = () => saveTone($("chatTone").value);
+  $("useDefault").onclick = () => saveTone("");
+  $("cancelTone").onclick = () => $("toneDialog").close();
+  let searchTimer;
+  $("search").oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(loadChats, 200); };
+
+  const kinds = { feat: "Novidade", fix: "Correção", perf: "Melhoria" };
+  const formatDate = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("pt-BR");
+  function note(text) {
+    const m = text.match(/^(\w+)(?:\([^)]*\))?!?:\s*(.*)$/);
+    const type = m ? m[1] : "";
+    return el("li", {}, el("span", { className: "tag " + type, textContent: m ? kinds[type] || "Interno" : "•" }), el("span", { textContent: m ? m[2] : text }));
+  }
+  $("openChangelog").onclick = async () => {
+    try {
+      const log = await (await fetch("changelog.json")).json();
+      $("current").textContent = "Você está na versão " + log.current + ".";
+      $("versions").replaceChildren(...log.versions.map((v) => el("div", { className: "version" },
+        el("h3", {}, "Versão " + v.version, el("time", { textContent: formatDate(v.date) }),
+          ...(v.version === log.current ? [el("span", { className: "tag feat", textContent: "em uso" })] : [])),
+        el("ul", {}, ...v.notes.map(note)))));
+    } catch (err) {
+      $("current").textContent = "O changelog não carregou: " + err;
+      $("versions").replaceChildren();
+    }
+    $("changelog").showModal();
+  };
+  $("closeChangelog").onclick = () => $("changelog").close();
+
+  window.addEventListener("load", async () => {
+    refreshStatus();
+    setInterval(refreshStatus, 2000);
+    loadChats();
+    try { $("defaultTone").value = await app().DefaultTone(); } catch (err) { $("defaultSaved").textContent = "O tom padrão não carregou: " + err; }
+  });
 </script>
 </body>
 </html>

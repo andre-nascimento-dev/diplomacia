@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"embed"
 	"fmt"
 	"os"
@@ -53,11 +54,11 @@ func run() error {
 	}
 
 	model := filepath.Join(dir, "models", modelFile)
-	app := &App{}
+	app := &App{db: db}
 	return wails.Run(&options.App{
 		Title:             "Recado",
-		Width:             480,
-		Height:            520,
+		Width:             520,
+		Height:            760,
 		MinWidth:          360,
 		MinHeight:         420,
 		AssetServer:       &assetserver.Options{Assets: assets},
@@ -77,6 +78,7 @@ func run() error {
 }
 
 type App struct {
+	db  *sql.DB
 	mu  sync.Mutex
 	wa  *WA
 	err error
@@ -112,3 +114,11 @@ func (a *App) Status() Status {
 	detail, qr := a.wa.State()
 	return Status{Connected: a.wa.cli.IsConnected() && a.wa.cli.IsLoggedIn(), Detail: detail, QR: qr}
 }
+
+func (a *App) Chats(query string) ([]Chat, error) { return listChats(a.db, query, 50, 0) }
+
+func (a *App) DefaultTone() (string, error) { return defaultTone(a.db) }
+
+func (a *App) SetDefaultTone(tone string) error { return setDefaultTone(a.db, tone) }
+
+func (a *App) SetChatTone(jid, tone string) error { return setChatTone(a.db, jid, tone) }

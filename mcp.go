@@ -64,6 +64,15 @@ type sendAudioIn struct {
 	Path string `json:"path" jsonschema:"caminho absoluto de um arquivo de áudio local; o Recado converte para mensagem de voz"`
 }
 
+type toneIn struct {
+	Chat string `json:"chat" jsonschema:"JID da conversa ou número com DDI e DDD"`
+}
+
+type setToneIn struct {
+	Chat string `json:"chat,omitempty" jsonschema:"JID da conversa ou número com DDI e DDD; vazio grava o tom padrão de todas as conversas"`
+	Tone string `json:"tone" jsonschema:"como escrever: formalidade, tamanho, emojis, tratamento; vazio apaga o tom"`
+}
+
 func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 	s := mcp.NewServer(&mcp.Implementation{Name: "recado", Version: "0.1.0"}, nil)
 
@@ -116,7 +125,34 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return jsonResult(findContacts(ctx, storePath, in.Query))
 		})
 
-	mcp.AddTool(s, &mcp.Tool{Name: "send_message", Description: "Envia uma mensagem de texto pelo WhatsApp. O app Recado precisa estar aberto."},
+	mcp.AddTool(s, &mcp.Tool{Name: "get_tone", Description: "Devolve o tom de escrita para uma conversa: o tom da conversa, ou o tom padrão quando a conversa não tem um. Chame antes de redigir uma mensagem e siga o tom."},
+		func(ctx context.Context, _ *mcp.CallToolRequest, in toneIn) (*mcp.CallToolResult, any, error) {
+			chat, err := normalizeChat(in.Chat)
+			if err != nil {
+				return nil, nil, err
+			}
+			return jsonResult(chatTone(db, chat))
+		})
+
+	mcp.AddTool(s, &mcp.Tool{Name: "set_tone", Description: "Grava o tom de escrita de uma conversa, ou o tom padrão quando chat fica vazio. Use só quando a pessoa pedir."},
+		func(ctx context.Context, _ *mcp.CallToolRequest, in setToneIn) (*mcp.CallToolResult, any, error) {
+			if in.Chat == "" {
+				if err := setDefaultTone(db, in.Tone); err != nil {
+					return nil, nil, err
+				}
+				return textResult("Tom padrão gravado.")
+			}
+			chat, err := normalizeChat(in.Chat)
+			if err != nil {
+				return nil, nil, err
+			}
+			if err := setChatTone(db, chat, in.Tone); err != nil {
+				return nil, nil, err
+			}
+			return textResult("Tom da conversa gravado.")
+		})
+
+	mcp.AddTool(s, &mcp.Tool{Name: "send_message", Description: "Envia uma mensagem de texto pelo WhatsApp. Antes de redigir, leia o tom da conversa com get_tone. O app Recado precisa estar aberto."},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in sendIn) (*mcp.CallToolResult, any, error) {
 			if strings.TrimSpace(in.Text) == "" {
 				return nil, nil, fmt.Errorf("a mensagem está vazia")

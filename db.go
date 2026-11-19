@@ -39,7 +39,9 @@ ALTER TABLE messages ADD COLUMN file_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE messages ADD COLUMN size INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE messages ADD COLUMN media BLOB;
 UPDATE messages SET kind = 'audio', mime = 'audio/ogg' WHERE file <> '';
-ALTER TABLE outbox ADD COLUMN file TEXT NOT NULL DEFAULT '';`}
+ALTER TABLE outbox ADD COLUMN file TEXT NOT NULL DEFAULT '';`, `
+CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+ALTER TABLE chats ADD COLUMN tone TEXT NOT NULL DEFAULT '';`}
 
 func openDB(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "file:"+path+"?_foreign_keys=on&_journal_mode=WAL&_busy_timeout=5000&_txlock=immediate")
@@ -252,13 +254,14 @@ type Chat struct {
 	JID    string `json:"jid"`
 	Name   string `json:"name"`
 	LastTS int64  `json:"lastTs"`
+	Tone   string `json:"tone"`
 }
 
 func listChats(db *sql.DB, query string, limit int, before int64) ([]Chat, error) {
 	if before <= 0 {
 		before = math.MaxInt64
 	}
-	rows, err := db.Query(`SELECT jid, name, last_ts FROM chats WHERE (name LIKE ? OR jid LIKE ?) AND last_ts < ? ORDER BY last_ts DESC LIMIT ?`,
+	rows, err := db.Query(`SELECT jid, name, last_ts, tone FROM chats WHERE (name LIKE ? OR jid LIKE ?) AND last_ts < ? ORDER BY last_ts DESC LIMIT ?`,
 		"%"+query+"%", "%"+query+"%", before, limit)
 	if err != nil {
 		return nil, err
@@ -267,12 +270,51 @@ func listChats(db *sql.DB, query string, limit int, before int64) ([]Chat, error
 	out := []Chat{}
 	for rows.Next() {
 		var c Chat
-		if err := rows.Scan(&c.JID, &c.Name, &c.LastTS); err != nil {
+		if err := rows.Scan(&c.JID, &c.Name, &c.LastTS, &c.Tone); err != nil {
 			return nil, err
 		}
 		out = append(out, c)
 	}
 	return out, rows.Err()
+}
+
+type Tone struct {
+	Tone   string `json:"tone"`
+	Source string `json:"source"`
+}
+
+func defaultTone(db *sql.DB) (string, error) {
+	var tone string
+	err := db.QueryRow(`SELECT value FROM settings WHERE key = 'tone'`).Scan(&tone)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	return tone, err
+}
+
+func setDefaultTone(db *sql.DB, tone string) error {
+	_, err := db.Exec(`INSERT INTO settings (key, value) VALUES ('tone', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value`, strings.TrimSpace(tone))
+	return err
+}
+
+func setChatTone(db *sql.DB, chat, tone string) error {
+	_, err := db.Exec(`INSERT INTO chats (jid, tone) VALUES (?, ?) ON CONFLICT (jid) DO UPDATE SET tone = excluded.tone`, chat, strings.TrimSpace(tone))
+	return err
+}
+
+func chatTone(db *sql.DB, chat string) (Tone, error) {
+	var tone string
+	if err := db.QueryRow(`SELECT tone FROM chats WHERE jid = ?`, chat).Scan(&tone); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return Tone{}, err
+	}
+	if tone != "" {
+		return Tone{Tone: tone, Source: "conversa"}, nil
+	}
+	tone, err := defaultTone(db)
+	if err != nil || tone == "" {
+		return Tone{Source: "nenhum"}, err
+	}
+	return Tone{Tone: tone, Source: "padrão"}, nil
 }
 
 type Outgoing struct {
