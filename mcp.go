@@ -176,6 +176,7 @@ func runMCP(ctx context.Context, db *sql.DB, storePath string) error {
 			return queueAndWait(ctx, db, Outgoing{Chat: in.Chat, Text: in.Caption, File: in.Path})
 		})
 
+	addPrompts(s)
 	return s.Run(ctx, &mcp.StdioTransport{})
 }
 
